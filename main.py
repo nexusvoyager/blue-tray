@@ -1,3 +1,4 @@
+import multiprocessing.process
 import atproto as at
 import flet as ft
 from dotenv import load_dotenv
@@ -13,10 +14,8 @@ client = at.Client(base_url="https://bsky.social")
 client.login(BSKY_HANDLE, BSKY_PASS)
 data = client.get_profile(actor="nexusvoyager.bsky.social")
 
-postContents = ft.TextField(hint_text="What's happening?", max_length=300)
-postButton = ft.FilledButton(text="Post!", icon=ft.icons.SEND   )
-
- 
+postContents = ft.TextField(hint_text="What's happening?", max_length=300, multiline=True)
+postButton = ft.FilledButton(text="Post!", icon=ft.icons.SEND)
 
 postUi = ft.Column(
     [
@@ -26,15 +25,13 @@ postUi = ft.Column(
     ], 
 )
 
+
 userUi = ft.Row(
     [
         ft.CircleAvatar(content=ft.Icon(ft.icons.PERSON), foreground_image_src=data.avatar),            
-        ft.Row([ft.Column([ft.Text(data.display_name),  ft.Text(f"@{data.handle}")], spacing=0, expand=True), ft.IconButton(ft.icons.MORE_HORIZ  )], expand=True),
+        ft.Row([ft.Column([ft.Text(data.display_name),  ft.Text(f"@{data.handle}")], spacing=0, expand=True)], expand=True),
     ]
 )
-
-
-
 
 def main(page: ft.Page):
     page.title = "Blue tray"
@@ -42,6 +39,8 @@ def main(page: ft.Page):
     page.window.height = 300
     page.window.resizable = False
     page.window.maximizable = False
+    page.window.always_on_top = True
+
 
     page.snack_bar = ft.SnackBar(
         content=ft.Text(""),    
@@ -56,11 +55,13 @@ def main(page: ft.Page):
             client.send_post(postContents.value)
             page.snack_bar = ft.SnackBar(content=ft.Text("Post sent!"))
             page.snack_bar.open = True
+            postContents.value = ""
             page.update()
 
 
     
     postButton.on_click = sendPost
+    
 
     page.add(
         ft.Column(
@@ -73,5 +74,12 @@ def main(page: ft.Page):
         
     )
 
+def about(page: ft.Page):
+    page.add(
+        ft.Text("Well this is a about page!")
+    )
 
-ft.app(main)
+        
+if __name__ == "__main__":
+    app = multiprocessing.Process(target=ft.app(main))
+    app.start()
